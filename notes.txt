@@ -1,0 +1,1060 @@
+Blind 75 leetcode
+https://leetcode.com/discuss/general-discussion/460599/blind-75-leetcode-questions
+
+CONTAINS DUPLICATE
+    -Use dictionary or hashset to find duplicates
+** contains duplicate code sample **
+public class Solution {
+    public bool ContainsDuplicate(int[] nums) {
+        
+        if (nums.Length == 0) return false;
+        
+        var distinctNums = new Dictionary<int, int>();
+        
+        for (var i = 0; i < nums.Length; i++) {
+            var currentNum = nums[i];
+            if (distinctNums.ContainsKey(currentNum))
+                return true;
+            
+            if (!distinctNums.ContainsKey(currentNum))
+                distinctNums.Add(currentNum, i);
+        }
+        
+        return false;
+    }
+}
+
+
+BEST TIME TO BUY AND SELL STOCK
+    -idea is to find the biggest profit by finding the difference
+    between the smallest price and the biggest price
+    -since we don't know what the smallest price or max profit is
+    we'll start off with the first price being the smallest price    
+    and profit being 0
+    -we'll loop through once. as we go through the loop, we'll
+    find the smallest price. if the smallest price is already
+    selected, find the profit.
+    -at the end of the loop, return the profit
+
+** BEST TIME TO BUY AND SELL STOCK CODE SAMPLE **
+public class Solution {
+    public int MaxProfit(int[] prices) {
+        if (prices.Length == 0) return 0;
+        
+        var smallestPrice = prices[0];
+        var profit = 0;
+        
+        foreach (var currentPrice in prices) {
+            if (currentPrice < smallestPrice) {
+                smallestPrice = currentPrice;
+                continue;
+            }
+            
+            var newProfit = currentPrice - smallestPrice;
+            if (newProfit > profit) {
+                profit = currentPrice - smallestPrice;
+        }
+        
+        return profit;
+    }
+}
+
+
+PROCDUT OF ARRAY EXCEPT SELF
+    -The goal is to return an array with the same length as
+    the original array that was given to us through the
+    parameter that contains the products of each element,
+    excluding itself.
+    -The idea is to find the product of the prefixes and
+    suffixes of the targeted element. (prefixed * suffixes of nums[i])
+    -The most optimal solution is to loop through the original
+    array once and find the prefixes and suffixes for each element,
+    multiply them, and shove them into the returned array.
+
+** PROCDUT OF ARRAY EXCEPT SELF CODE SAMPLE **
+public class Solution {
+    public int[] ProductExceptSelf(int[] nums) {
+        // Array that we want to return.
+        var results = new int[nums.Length];
+       
+        // Find all prefixes for all numbers.
+        // Shove it into results.
+        var prefix = 1;
+        for (var i = 0; i < nums.Length; i++) {
+            results[i] = prefix;
+            prefix *= nums[i];
+        }
+        
+      
+        // Find all the suffixes for all numbers.
+        // For each suffix, mulitply it by the
+        // prefixes that are in results going
+        // backwards.
+        var suffix = 1;
+        for (var i = nums.Length - 1; i >= 0; i--) {
+            results[i] *= suffix;
+            suffix *= nums[i];
+        }
+       
+        // Simply return.
+        return results;
+    }
+}
+
+
+MAXIUM SUBARRAY
+    -The goal for this problem is to find largest sum
+    of a subarray within the given array.
+    -How we'll do this is we'll keep two variables (previousSum, maxSum)
+    out of the loop and track them throughout the algorithm.
+    -Foreach number, we'll add the previousSum with nums[i]
+    (previousSum + nums[i]). If the sum is greater than previousSum,
+    assign previousSum to the new sum, otherwise, sustain previousSum's
+    value. For maxSum, every loop we'll want to check if maxSum is greater
+    than previousSum. If it is, we'll assign maxSum = previousSum.
+    -The idea here is the if the current number is greater than previousSum,
+    then that means we have to start a new array. Which means, we'll botch
+    previousSum for nums[i], since nums[i] is greater than previousSum.
+
+** MAXIMUM SUBARRAY CODE SAMPLE **
+public class Solution {
+    public int MaxSubArray(int[] nums) {
+        var previousMaxSum = nums[0];
+        var maxSum = nums[0];
+        
+        for (var i = 1; i < nums.Length; i++) {
+            var currentAdd = previousMaxSum + nums[i];
+            previousMaxSum = nums[i] > currentAdd ? nums[i] : currentAdd;
+            maxSum = previousMaxSum > maxSum ? previousMaxSum : maxSum;
+        }
+        
+        return maxSum;
+    }
+}
+
+
+MAXIMUM PRODUCT SUBARRAY - DYNAMIC PROGRAMMING
+    -This problem utilizes dynamic programming and is not as intuitive
+    as I would have expected. At first, this problem seemed like I could
+    have solved it similar to Maximum Subarray, but I was wrong.
+
+    -The most optimal solution for this problem uses dynamic programming
+    by holding two distictive arrays: minArray and maxArray.
+
+    -The idea here is that we'll use both array to find a product and then
+    compare to see which value we'll choose: the product or the current value.
+
+    -Before we start the loop, we'll initialize both minArray and maxArray and
+    give them initial values of nums[0]. We want to do this because nums.Length
+    has to have at least one value. Obviously, if there's only one value, then
+    we return the only value given.
+
+    -In detail, we'll loop through the given array, nums, only once. We can start
+    off by finding maxArray[i] by finding product of nums[i] * maxArray[i-1] and
+    nums[i] * minArray[i-1], then choosing the higher product value. After choosing
+    the higher product value, we need to use THAT product value and compare it to
+    the nums[i]. If nums[i] is great than the chosen product, then maxArray[i] = nums[i],
+    otherwise maxArray[i] = chosen product.
+
+        -EXAMPLE:
+        maxArray[i] = Math.Max(
+            Math.Max(nums[i] * maxArray[i-1], nums[i] * minArray[i-1]),
+                        nums[i]
+                );
+
+    -We'll need to do a similiar step but chose the minimum product value now. We
+    need to find the minimum value and put it in minArray[i].
+
+        -EXAMPLE:
+        minArray[i] = Math.Min(
+                    Math.Min(nums[i] * maxArray[i-1], nums[i] * minArray[i-1]),
+                    nums[i]
+                );
+    -Lastly, use the maxArray to find the max value and return it.
+
+** MAXIMUM PRODUCT SUBARRAY CODE SAMPLE **
+public class Solution {
+    public int MaxProduct(int[] nums) {
+        if (nums.Length == 1) return nums[0];
+     
+        int[] minArray = new int[nums.Length], maxArray = new int[nums.Length];
+        
+        minArray[0] = nums[0];
+        maxArray[0] = nums[0];
+ 
+        for (var i = 1; i < nums.Length; i++) {
+            // Using the maxArray, we want to find the max product
+            // when multiplying the current number with the previous
+            // maxArray[i] and minArray[i]. After finding the product
+            //  we want to compare the currentNumber to the product.
+            // If the current number is higher, we take the current number,
+            // otherwise we'll take the product.
+            maxArray[i] = Math.Max(
+                    Math.Max(nums[i] * maxArray[i-1], nums[i] * minArray[i-1]),
+                    nums[i]
+                );
+           
+            // This is the same idea as finding the max product but instead
+            // we want to find the smallest value, using the minArray. Find
+            // the smallest product value in both maxArray and minArray when
+            // multiplying with the current number. Then compare the product
+            // to the current number and take the smallest value.
+            minArray[i] = Math.Min(
+                Math.Min(nums[i] * maxArray[i-1], nums[i] * minArray[i-1]),
+                nums[i]
+            );
+        }
+        
+        return maxArray.Max();
+    }
+}
+
+
+FIND MINIMUM IN ROATED SORTED ARRAY
+    -For this problem, using Binary Search will get the correct answer since
+    it's requirements for the solution's runtime is O(log n).    
+    -Remember, Binary Search works on ordered lists and this is an ordered list
+
+** FIND MINIMUM IN ROATED SORTED ARRAY CODE SAMPLE **
+public class Solution {
+    public int FindMin(int[] nums) {
+        if (nums.Length == 1) return nums[0];
+        
+        var leftPointer = 0;
+        var rightPointer = nums.Length - 1;
+        var minValue = nums[0];
+        
+        while (leftPointer <= rightPointer) {
+            var midPointer = leftPointer + (rightPointer - leftPointer) / 2;
+       
+            if (nums[midPointer] < nums[rightPointer]) {
+                minValue = Math.Min(minValue, nums[midPointer]);
+                rightPointer = midPointer - 1;
+            } else {
+                minValue = Math.Min(minValue, nums[rightPointer]);
+                leftPointer = midPointer + 1;
+            }
+        }
+        
+        return minValue;
+    }
+}
+
+
+3 SUM
+    -For this problem we'll be returning a List<List<int>> of triplet
+    digits that add up to zero.
+    -The idea here is to simply finding the first digit of the triplet
+    and then using a window (two pointers, left and right) to find the
+    next two digits.
+    -There's two catches to this problem: we need to sort the array first
+    and inside the loop, if the current element is the same as the previous
+    number, then skip that element.
+
+** 3 SUM CODE SAMPLE **
+public class Solution {
+    public IList<IList<int>> ThreeSum(int[] nums) {
+        
+        List<IList<int>> finalResult = new List<IList<int>>();
+        Array.Sort(nums);
+
+        for (var i = 0; i < nums.Length; i++) {
+            if (i > 0 && nums[i - 1] == nums[i]) continue;
+           
+        // Setting up window pointers.
+            var leftPointer = i + 1;
+            var rightPointer = nums.Length - 1;
+           
+        // Window algorithm portion.
+            while (leftPointer < rightPointer) {
+                var sum = nums[i] + nums[leftPointer] + nums[rightPointer];
+                
+                if (sum == 0) {
+                    finalResult.Add(new List<int> {nums[i], nums[leftPointer], nums[rightPointer]});
+                    while (leftPointer < rightPointer && nums[leftPointer] == nums[leftPointer + 1]) { leftPointer++; }
+                    while (leftPointer < rightPointer && nums[rightPointer] == nums[rightPointer - 1]) { rightPointer--;}
+                    
+                    leftPointer++;
+                    rightPointer--;
+                } else if (sum < 0) {
+                    leftPointer++;
+                } else {
+                    rightPointer--;
+                }
+                
+            }
+        }
+        
+        return finalResult;
+    }
+}
+
+CONTAINER WITH MOST WATER
+    -This problem is pretty simple, one of the best ways to solve it is to
+    implement a slide window on the array.
+    -For the sliding window, we'll start at both ends- the beginning and
+    the end. Keep in mind that the ends of the window are pointers for the
+    indices, not the actual elements in the array. So, while the left pointer
+    is less than the right pointer, we'll find the smaller edge of the two
+    pointers and then find the area from those two pointers. After finding the
+    area, we'll compare the maxArea with the currentArea and take the higher value.
+
+** CONTAINER WITH MOST WATER CODE SAMPLE **
+public class Solution {
+    public int MaxArea(int[] height) {
+       
+        // Global values that we'll be using throughout the algorithm.
+        var maxArea = int.MinValue;
+        var leftEdge = 0;
+        var rightEdge = height.Length - 1;
+       
+        // This while loop is a Window implementation. We'll start at
+        // the beginning and end of the array and squeeze to the middle.
+        while (leftEdge < rightEdge) {
+            var smallerEdge = Math.Min(height[leftEdge], height[rightEdge]);
+            var newArea = smallerEdge * (rightEdge - leftEdge);
+            maxArea = Math.Max(maxArea, newArea);
+      
+            // The smaller edge will be the one we want to move on from,
+            // which means we keep the bigger edge.
+            if (height[leftEdge] < height[rightEdge]) { // Keep IF statement like this, does impact performance for bigger lists.
+                leftEdge++;
+            } else {
+                rightEdge--;
+            }
+        }
+        
+        return maxArea;
+    }
+}
+
+SEARCH IN ROTATED SORTED ARRAY
+    -The idea here is to use Binary Search, the rest of the logic is specific to the quirks of the problem itself. We’ll use the WHILE loop to facilitate the Binary Search. Within the loop, we’ll try to figure out if the array is sorted or not by using an IF statement.
+
+** SEARCH IN ROTATED SORTED ARRAY **
+public class Solution {
+    public int Search(int[] nums, int target) {
+        // BINARY SEARCH
+       
+        // Pointers
+        var left = 0;
+        var right = nums.Length - 1;
+       
+        // IMPORTANT!! Make sure to have "<=", not just "<"
+        // for the WHILE loop condition.
+        while (left <= right) {
+            var mid = left + (right - left) / 2;
+            
+            if (nums[mid] == target) return mid;
+           
+            if (nums[mid] < nums[right]) {
+                // If middle < right, we now know which direction
+                // we'll want to take depending on the value of
+                // our target. If mid < target < right, then we'll
+                // choose the right side of the binary search.
+                
+                // IMPORTANT!! Make sure to have "<=", not just "<"
+                if (nums[mid] <= target && target <= nums[right]) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
+            } else { // nums[mid] > nums[right]
+                
+                // If middle > right, we now know that it's
+                // rotated. We probably don't want to try
+                // to figure out how much it's rotated by,
+                // but with the second IF statement, we can
+                // determine which side of the binary search
+                // to choose.
+                
+                // The second IF statement is the big idea here.
+                // If left <= target <= mid, then we'll take the
+                // left side of the binary search, otherwise we'll
+                // take the right side of the search.
+                if (nums[left] <= target && target <= nums[mid]) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            }
+        }
+        
+        return -1;
+    }
+}
+    
+    
+
+CLIMBING STAIRS    
+    -This problem sounds confusing at first, but the solution is fairly
+    trivial. The solution is to simply implement the fibonacci sequence.
+    The core idea for this problem is to calculate the sum for different
+    steps that may be available. The most straight forward way to do this
+    is to literally calculate the sum (+1 or +2) for every step that we
+    may take and return the final sum. This is very uneffective as it
+    results in O(n^2). The trick to saving us that time is to cache the
+    previous calculations in either an array or two variables. Using two
+    variables is the BEST option here, it results in O(n) runtime, O(1) space.
+
+** CLIMBING STAIRS CODE SAMPLE **
+public class Solution {
+    public int ClimbStairs(int n) {
+      
+        // Base case statements;
+        if (n == 1) return 1;
+        if (n == 2) return 2;
+     
+        // firstPointer and secondPointer are 1 and 2
+        // respectively because of the IF statements
+        // prior. After those IF statements, we're
+        // we can stay we're starting at step 2.
+        var firstPointer = 1;
+        var secondPointer = 2;
+        var sum = 0;
+       
+        // This is fibonacci sequence without an
+        // array cache.
+        for (var i = 2; i < n; i++) {
+            sum = firstPointer + secondPointer;
+            firstPointer = secondPointer;
+            secondPointer = sum;
+        }
+        
+        return sum;
+    }
+}
+
+REVERSE A LINKED LIST
+    -Reversing a linked list was a little tricky for me. The solution is
+    immensely simple: we want to keep track the previousNode, head,
+    and the nextNode. Throughout the loop condition (while (head != null))
+    we'll switch variables around so that the nextNode = previousNode,
+    previousNode = head, and head = nextNode. We'll also cache nextNode
+    earlier in the loop because the value will be overwritten later in
+    the loop. Lastly, we'll return the prevousNode.
+
+** REVERSE A LINKED LIST SAMPLE CODE **
+public class Solution {
+    public ListNode ReverseList(ListNode head) {
+        
+        ListNode prevNode = null;
+        while (head != null) {
+            var nextNode = head.next;
+            head.next = prevNode;
+            prevNode = head;
+            head = nextNode;
+        }
+        
+        return prevNode;
+    }
+}
+
+LINKED LIST CYCLE
+    -Finding a linked list cycle was straight forward for me to figure out
+    for the most part. The main idea here is to use two pointers, slowPointer
+    and fastPointer, and have them traverse through the list at different speeds.
+    If there's a cycle within the list, they'll meet each other at one node, otherwise
+    they'll never meet if there's no cycle.
+
+** LINKED LIST CYCLE SAMPLE CODE **
+public class Solution {
+    public ListNode ReverseList(ListNode head) {
+        
+        ListNode prevNode = null;
+        while (head != null) {
+            var nextNode = head.next;
+            head.next = prevNode;
+            prevNode = head;
+            head = nextNode;
+        }
+        
+        return prevNode;
+    }
+}
+
+
+Remove n’th node from end of list
+	-Removing the n’th node from the end of the list has a straightforward solution 
+	along with a clever and trickier solution. The straightforward solution will loop 
+	over the linked-list while keeping a counter variable in memory. We find the 
+	length of the linked-list and then find the difference between counter and n. 
+	After finding the difference, the difference should give us the position of which 
+	node to remove in the linked list. Within the for loop, we’ll get the node at 
+	difference - 1, and set node.next = node.next.next. At the end of the algorithm, 
+	we’ll return the head.
+	-The more clever and efficient solution is to have two pointers, slowPointer and 
+	fastPointer. The idea here is that we’ll use the fastPointer to traverse through 
+	the linked-list up to n+1 times. From there, we’ll iterate both slowPointer and 
+	fasterPointer incrementally until fastPointer is null. At the point where 
+	fastPointer is null, slowPointer should be at the position of the node we want 
+	to modify. With slowPointer at the position we need it to be in, we’ll modify 
+	the node at slowPointer to node.next.next, simply saying we’ll skip the next node.
+
+
+
+** remove n’th node from end of list code samples **
+public class Solution {
+    public ListNode RemoveNthFromEnd(ListNode head, int n) {
+        if (head.next is null) return null;
+        
+        var counter = 1;
+        var dummyHead = head;
+        while (dummyHead.next != null) {
+            dummyHead = dummyHead.next;
+            counter++;
+        }
+        
+        var difference = counter - n;
+        if (difference == 0)
+            return head.next;
+        
+        dummyHead = head;
+        for (var i = 0; i < difference; i++) {
+           if (i == difference - 1)  {
+               dummyHead.next = dummyHead.next?.next;
+               break;
+           }
+            
+            dummyHead = dummyHead.next;
+        }
+        
+        return head;
+    }
+}
+public class Solution {
+    public ListNode RemoveNthFromEnd(ListNode head, int n) {
+        // Base case
+        if (head.next is null) return null;
+       
+        // Start with a dummy head and then use the pointers.
+        var dummyHead = new ListNode(-1, head);
+        var slowPointer = dummyHead;
+        var fastPointer = dummyHead;
+       
+        // With this loop, we want to create a barrier
+        // between the fastPointer and slowPointer. How
+        // the math works is that when fastPointer reaches
+        // the end of the linked-list, slowPointer should be
+        // at the position of the node we want to modify.
+        for (var i = 1; i <= n+1; i++) {
+            fastPointer = fastPointer.next;
+        }
+       
+        // Simply traverse the linked-list until fastPointer
+        // is null. When fastPointer is null, slowPointer
+        // should be at the position we want to modify.
+        while (fastPointer != null) {
+            slowPointer = slowPointer.next;
+            fastPointer = fastPointer.next;
+        }
+       
+        // Now that slowPointer is at the position of the
+        // node we want to modify, we'll simply set node.next
+        // to the node following the immediate next node.
+        slowPointer.next = slowPointer.next?.next;
+        return dummyHead.next;
+    }
+}
+
+Permutations
+	-Performing permutations is tricky, but it’s quite straightforward if 
+	you use DFS and backtracking. We’re using DFS by choosing the first 
+	number and then diving into its neighbors. As we loop through the rest 
+	of the neighbors, we’re also backtracking. Backtracking is the idea where 
+	we undo or “backtrack” what we just did. Within the FOR loop, we’ll see 
+	how I’m adding values and then removing them; I’m simply undoing whatever 
+	logic the code just performed.
+
+** permutations code sample **
+public class Solution {
+    public IList<IList<int>> Permute(int[] nums) {
+        
+        // Using DFS and backtracking.
+        
+        // This is the final results list we'll be returning.
+        var results = new List<IList<int>>();
+        
+        // Using recursion here.
+        DFS(nums, new bool[nums.Length], new List<int>(), results);
+        return results;
+    }
+    
+   
+    // Recursive method for DFS and backtracking.
+    private void DFS(
+        int[] nums,
+        bool[] isVisited,
+        List<int> result,
+        List<IList<int>> results) {
+        
+        if (result.Count == nums.Length) {
+            results.Add(new List<int>(result));
+            return;
+        }
+        
+        for (var i = 0; i < nums.Length; i++) {
+            if (isVisited[i]) continue;
+            
+            isVisited[i] = true;
+            result.Add(nums[i]);
+            
+            DFS(nums, isVisited, result, results);
+           
+            // Backtracking. We're undoing what we just did
+            // before we called DFS().
+            isVisited[i] = false;
+            result.RemoveAt(result.Count - 1);
+        }
+    }
+}
+
+
+Invert Binary Tree
+	-Inverting a binary tree is trivial when knowing Depth-First and 
+	Breadth-First algorithms (queue and stack data structures). There
+	isn't much to explain for this problem. All you have to do is swap
+	the child nodes for each node available.
+
+public class Solution {
+    public TreeNode InvertTree(TreeNode root) {
+	// DEPTH-FIRST ALGORITHM
+
+	// Base case
+        if (root is null) return null;
+       
+	// Use temp variable to swap values. 
+        var tempNode = root.left;
+        root.left = root.right;
+        root.right = tempNode;
+       
+	// Use DFS 
+        InvertTree(root.left);
+        InvertTree(root.right);
+        
+        return root;
+    }
+}
+
+public class Solution {
+    public TreeNode InvertTree(TreeNode root) {
+	// BREADTH-FIRST ALGORITHM
+
+	// Base case
+        if (root is null) return null;
+       
+	// Queue data structure 
+        var nodeQueue = new List<TreeNode>();
+        nodeQueue.Add(root);
+       
+	// Loop through all nodes in the queue 
+        while (nodeQueue.Count > 0) {
+            var topNode = nodeQueue[0];
+          
+	// Add nodes to the queue 
+            if (topNode.left != null)
+                nodeQueue.Add(topNode.left);
+            
+            if (topNode.right != null)
+                nodeQueue.Add(topNode.right);
+            
+            var tempNode = topNode.left;
+            topNode.left = topNode.right;
+            topNode.right = tempNode;
+           
+	// Remove the first node 
+            nodeQueue.RemoveAt(0);
+        }
+        
+        return root;
+    }
+}
+
+3SUM CLOSEST
+	-3Sum Closest is almost identical to 3Sum with the difference
+	that we are looking for the closest sum to the target instead
+	of a list of triplets.
+	-This solution uses a window algorithm, something reoccuring in 
+	3Sum and the rest of the KSum solutions. 
+	-We'll need to keep track of a global sum and a local sum to compare
+	the differences in amount to the target value.
+
+** 3SUM CLOSEST CODE EXAMPLE **
+public class Solution {
+    public int ThreeSumClosest(int[] nums, int target) {
+        // Base case.
+        var sum = nums[0] + nums[1] + nums[2]; 
+        if (nums.Length == 3) return sum;
+        
+        Array.Sort(nums);
+        for (var i = 0; i < nums.Length - 2; i++) {
+            // Setting up window pointers.
+            var left = i + 1;
+            var right = nums.Length - 1;
+           
+            // Window algorithm.
+            while (left < right) {
+                var tempSum = nums[i] + nums[left] + nums[right];
+               
+                if (tempSum == target) {
+                    // Simply return the tempSum if it's exactly the value we need.
+                    return tempSum;
+                } else if (tempSum < target) {
+                    left++;
+                } else {
+                    right--;
+                }
+                
+                // Figure out the differences and which difference to choose from.
+                var differenceTempSum = Math.Abs(target - tempSum);
+                var differenceSum = Math.Abs(target - sum);
+                sum = differenceTempSum < differenceSum ? tempSum : sum;
+            }
+        }
+        
+        return sum;
+    }
+}
+
+IS SUBSEQUENCE
+
+** IS SUBSEQUENCE EXAMPLE **
+public class Solution {
+    public bool IsSubsequence(string s, string t) {
+        // Base cases
+        if (string.IsNullOrEmpty(s))
+            return true;
+       
+        if (!string.IsNullOrEmpty(s) && string.IsNullOrEmpty(t))
+            return false;
+      
+        // Pointers that we'll use to iterate through the strings.
+        var sPointer = 0;
+        var tPointer = 0;
+        while (tPointer < t.Length) {
+            if (s[sPointer] == t[tPointer]) {
+                sPointer++;
+                tPointer++;
+            } else {
+                tPointer++;
+            }
+         
+            // When sPointer >= s.Length, that means that all
+            // of the characters in "s", was found in "t".
+            if (sPointer >= s.Length)
+                return true;
+        }
+        
+        return false;
+    }
+}
+
+IS ISOMORPHIC
+
+** IS ISOMORPHIC EXAMPLE **
+public class Solution {
+    public bool IsIsomorphic(string s, string t) {
+        
+        // We'll iterate through both strings and then
+        // keep track of the characters we come across.
+        // When we iterate through both strings, we'll
+        // have the idea that s[i] => t[i] (s[i] can be 
+        // changed to t[i]).
+       
+        // The idea is that only 1 kind of character 
+        // can be mapped to another 1 kind of character. 
+        // Ex. b => z, a => p, c => q, but if we come across another "a"
+        // and it points to "z", then that'll break the requirements,
+        // thus return false.
+        
+        // This is our map that we'll be referencing. 
+        var charMap = new Dictionary<char, char>();
+        
+       
+        // Loop through the strings.
+        for (var i = 0; i < s.Length; i++) {
+            var currentSChar = s[i];
+            var currentTChar = t[i];
+           
+            // Add the current characters if they don't exist in our map.
+            if (!charMap.ContainsKey(currentSChar) && !charMap.ContainsValue(currentTChar)) {
+                charMap.Add(currentSChar, currentTChar);
+                continue;
+            }
+        
+            // These are logic that will see if the rules of the
+            // requirements are broken.
+            if (!charMap.ContainsKey(currentSChar) && charMap.ContainsValue(currentTChar))
+                return false;
+            
+            if (charMap.ContainsKey(currentSChar) && charMap[currentSChar] != currentTChar)
+                return false;
+        }
+     
+        // Since all of the possible logic to return false
+        // are up there, we can simply return true here.
+        return true;
+    }
+}
+
+LINKED LIST CYCLE 2
+-There's two approaches that I used: 1) using a HashSet and 2) using a slow and fast pointer.The Hashset approach to this problem is O(N) space complexity, while the slow and fast pointer is constant space complexity.
+-Hashset Approach: While looping through the list, add the nodes to the hashset. If the node is already in the hashset, then we know there's a cycle and return that node.
+-Slow and Fast Node: Start both slow and fast pointer at the head. First, loop through to see if a cycle exists, if it does then break out of the loop and start over. This time, rewrite the slow pointer's value back to the head but leave the fast pointer alone. Loop through node by node until slow == fast pointer. Return the slow pointer.
+
+** LINKED LIST CYCLE 2 EXAMPLE **
+// Hashset Approach
+public class Solution {
+    public ListNode DetectCycle(ListNode head) {
+        
+        var listHashSet = new HashSet<ListNode>();
+        var dummyHead = head;
+        while (dummyHead != null) {
+            
+            if (listHashSet.Contains(dummyHead))
+                return dummyHead;
+       
+            listHashSet.Add(dummyHead);
+            dummyHead = dummyHead.next;
+        }
+        
+        return null;
+    }
+}
+
+// Slow and Fast Pointer Approach
+public class Solution {
+    public ListNode DetectCycle(ListNode head) {
+        if (head == null || head.next == null) return null;
+        
+        ListNode slowNode = head;
+        ListNode fastNode = head;
+        while (fastNode.next != null && fastNode.next.next != null) {
+            slowNode = slowNode.next;
+            fastNode = fastNode.next.next;
+            
+            if (slowNode == fastNode) break;
+        }
+        
+        if (fastNode.next == null || fastNode.next.next == null) return null;
+        
+        slowNode = head;
+        while (slowNode != fastNode) {
+            slowNode = slowNode.next;
+            fastNode = fastNode.next;
+        }
+        
+        return slowNode;
+    }
+}
+
+
+MIDDLE OF THE LINKED LIST
+** MIDDLE OF THE LINKED LIST EXAMPLE** 
+public class Solution {
+    public ListNode MiddleNode(ListNode head) {
+        if (head is null) return null;
+        
+        var listLength = 0;
+        var dummyHead = head;
+        while (dummyHead != null) {
+            dummyHead = dummyHead.next;
+            listLength++;
+        }
+        
+        dummyHead = head;
+        var target = listLength / 2;
+        for (var i = 0; i < target; i++) {
+            dummyHead = dummyHead.next;
+        }
+        
+        return dummyHead;
+    }
+}
+
+LONGEST PALINDROME
+	-This problem can be tricky but if having a keen eye will
+	notice that a plaindrome will only allow 1 odd and all even
+	counts of characters. For example, "BAB", notice how A is in
+	the middle and then the rest MUST have even counts to be 
+	included in the string.
+	-The idea here is to keep track of the counts of all characters
+	and then based on that, we'll need to handle odds and evens. The
+	easiest method is to count all characters and then ONLY add the
+	even numbers. If the count for a character is even, subtract the
+	count by 1 and add the count to the running number. At the end
+	of the algorithm, we'll know if we'll have encountered an odd.
+	If we encountered an odd, we'll increment the running value by 1.
+
+public class Solution {
+    public int LongestPalindrome(string s) {
+       
+        // Simply find the counts of each character.
+        var charCounts = new Dictionary<char, int>(); // char, count
+        foreach (var character in s) {
+            if (!charCounts.ContainsKey(character))
+                charCounts.Add(character, 1);
+            else
+                charCounts[character]++;
+        }
+ 
+        var runningCount = 0;
+        var foundOdd = false;
+        foreach (var count in charCounts.Values) {
+            // We're ONLY going to be adding even numbers to the
+            // runningCount. If we find an odd, we'll just subtract
+            // 1 to make it even because we only care about adding
+            // evens.
+            
+            if (count % 2 == 0) {
+                runningCount += count;
+            } else {
+                foundOdd = true;
+                runningCount += count - 1;
+            }
+        }
+       
+        // Here, since we know that there's an odd count existing,
+        // we'll just increment by 1.
+        if (foundOdd)
+            runningCount++;
+        
+        return runningCount;
+    }
+}
+
+N-ARY TREE PREORDER TRAVERSAL
+	-My approach for this solution uses recursion and a
+	foreach loop. The idea is to traverse through each node,
+	adding each visited node to a resultList.
+/*
+** Definition for a Node. **
+public class Node {
+    public int val;
+    public IList<Node> children;
+
+    public Node() {}
+
+    public Node(int _val) {
+        val = _val;
+    }
+
+    public Node(int _val,IList<Node> _children) {
+        val = _val;
+        children = _children;
+    }
+}
+*/
+
+public class Solution {
+    public IList<int> Preorder(Node root) {
+        // Base case
+        var resultList = new List<int>();
+        if (root is null) return resultList;
+      
+        // Recursive call
+        AddNodesToList(root, resultList);
+       return resultList; 
+    }
+    
+    private void AddNodesToList(Node node, IList<int> nodeList) {
+        // Base case
+        if (node is null) return;
+       
+        // Add the current node value
+        nodeList.Add(node.val);
+        
+        // Then foreach child, run recursive method
+        foreach (var childNode in node.children) {
+            AddNodesToList(childNode, nodeList);
+        }
+    }
+}
+
+STRING TO INTEGER (ATOI)
+	-I tried to do this as straight-forward as possible. I used helper methods
+	to try to clean up my logic.
+	-My algorithm iterates through the given string once. I also build a string
+	variable that I eventually parse into an integer.
+	-The main take away from this problem is to handle edge cases of TYPES.
+		-Make sure to check if it's exceeding ulongs, longs, etc., both
+		positive and negative values.
+
+public class Solution {
+    public int MyAtoi(string s) {
+        // Trimming white spaces at the beginning and end.
+        s = s.Trim();
+
+        // Special characters to check against throughout the method.
+        char negativeChar = '-';
+        char positiveChar = '+';
+
+        // This is the string value that the method is going to build and then parse.
+        string runningValue = string.Empty;
+        bool isNegative = false;
+        bool automaticZero = false;
+
+        for (int i = 0; i < s.Length; i++) {
+            char currentChar = s[i];
+
+            if (i == 0 && currentChar == negativeChar) {
+                isNegative = true;
+                continue;
+            }
+
+            if (i == 0 && currentChar == positiveChar) {
+                isNegative = false;
+                continue;
+            }
+
+            string currentValue = currentChar.ToString();
+            bool intParseable = int.TryParse(currentValue, out _);
+            if (i== 0 && !intParseable) { 
+                automaticZero = true; 
+                break; 
+            }
+
+            // Only build on to the runningValue if it's parseable.
+            if (intParseable) {
+                runningValue = runningValue + currentValue;
+                continue;
+            }
+
+            break;
+        }
+
+        // When concatenating to the string, adding the "-" and "+" makes it slightly easier to differentiate
+        // between negtive and positive values during parsing checks.
+        runningValue = isNegative ? string.Concat("-", runningValue) : string.Concat("+", runningValue);
+
+        // This condition trigers an automatic zero because the first character ABSOLUTELY
+        // needs to be either a digit or "-" or "+". Then, the following character ABSOLUTELY
+        // needs to be a digit, otherwise it's an invalid input. We only build on to the
+        // runningValue if it's paresable.
+        automaticZero = runningValue.Length < 2;
+        if (automaticZero) { return 0; }
+
+        if (int.TryParse(runningValue, out int finalResult)) { return finalResult; }
+        if (ExceedsUnsignedInt(runningValue, isNegative)) { return int.MaxValue; }
+        if (ExceedsSignedInt(runningValue, isNegative)) { return int.MinValue; }
+
+        return 0;
+    }
+
+    // Helper method to distinguish if s > int.MaxValue.
+    private bool ExceedsUnsignedInt(string s, bool isNegative) {
+        bool ulongParseable = ulong.TryParse(s, out ulong result);
+        if (ulongParseable && result > int.MaxValue) { return true; }
+        if (!ulongParseable && !isNegative) { return true; }
+        return false;
+    }
+
+    // Helper method to distinguish if s < int.MinValue.
+    private bool ExceedsSignedInt(string s, bool isNegative) {
+        bool longParseable = long.TryParse(s, out long result);
+        if (longParseable && result < int.MinValue) { return true; }
+        if (!longParseable && isNegative) { return true; }
+        return false;
+    }
+}
+
