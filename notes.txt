@@ -1058,3 +1058,30 @@ public class Solution {
     }
 }
 
+JUMP GAME
+	-The idea here is to use a greedy-algorithm approach.
+	-We iterate through "nums" and update "farthestTraveledIndex"
+	as we loop through "nums". When updating "farthestTraveledIndex",
+	we want to compare the "farthestTravledIndex" vs. the current index
+	plus the spaces available to jump from the current index.
+
+public class Solution {
+    public bool CanJump(int[] nums) {
+        // Base case
+        if (nums.Length == 1) return true;
+
+        int farthestTraveledIndex = 0;
+
+        // Here, try to find the farthest possible index to travel to.
+        // Loop until we hit the last position of nums or until we run
+        // out of jump-space possibilities (which results in not being
+        // able to make it to the end of the array).
+        for (int i = 0; i <= farthestTraveledIndex; i++) {
+            int allowedSpacesToTravel = i + nums[i]; // Current index + spaces to jump from current index.
+            farthestTraveledIndex = farthestTraveledIndex < allowedSpacesToTravel ? allowedSpacesToTravel : farthestTraveledIndex;
+            if (farthestTraveledIndex >= nums.Length - 1) return true;
+        }
+
+        return false;
+    }
+}
