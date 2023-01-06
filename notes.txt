@@ -749,6 +749,22 @@ public class Solution {
     }
 }
 
+public class Solution {
+    public bool IsSubsequence(string s, string t) {
+        if (string.IsNullOrEmpty(s)) return true;
+
+        int indexS = 0;
+
+        for (int i = 0; i < t.Length; i++) {
+            if (s[indexS] == t[i]) indexS++;
+
+            if (indexS > s.Length - 1) return true;
+        }
+
+        return false;
+    }
+}
+
 IS ISOMORPHIC
 
 ** IS ISOMORPHIC EXAMPLE **
@@ -793,6 +809,27 @@ public class Solution {
      
         // Since all of the possible logic to return false
         // are up there, we can simply return true here.
+        return true;
+    }
+}
+
+public class Solution {
+    public bool IsIsomorphic(string s, string t) {
+        if (s.Length != t.Length) return false;
+
+        Dictionary<char, char> charPointers = new Dictionary<char, char>();
+        HashSet<char> appointedChars = new HashSet<char>();
+        for (int i = 0; i < s.Length; i++) {
+            if (!charPointers.ContainsKey(s[i]) && !appointedChars.Contains(t[i])) {
+                charPointers.Add(s[i], t[i]);
+                appointedChars.Add(t[i]);
+                continue;
+            }
+
+            if (charPointers.ContainsKey(s[i]) && charPointers[s[i]] != t[i]) return false;
+            if (!charPointers.ContainsKey(s[i]) && appointedChars.Contains(t[i])) return false;
+        }
+
         return true;
     }
 }
