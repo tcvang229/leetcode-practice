@@ -450,6 +450,46 @@ public class Solution {
     }
 }
 
+	-This is the ineffecient way of solving this problem. How this
+	solution solves can be ineffecient because we're keeping track
+	of a separate list of nodes, a second singly-linked list,
+	and then iterating over that list of nodes that it created. 
+	-Although this is very ineffecient compared to the effecient 
+	solution, this is also the easiest and most straight forward
+	way to solve it.
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     public int val;
+ *     public ListNode next;
+ *     public ListNode(int val=0, ListNode next=null) {
+ *         this.val = val;
+ *         this.next = next;
+ *     }
+ * }
+ */
+public class Solution {
+    public ListNode ReverseList(ListNode head) {
+        // Create a list of nodes.
+        List<ListNode> trackedNodes = new List<ListNode>();
+        while (head != null) {
+            trackedNodes.Add(head);
+            head = head.next ?? null;
+        }
+
+        // Iterate backwards from trackedNodes and create
+        // a new singly-linked list.
+        ListNode returnedPointer = new ListNode();
+        ListNode returnedPointerHead = returnedPointer;
+        for (int i = trackedNodes.Count - 1; i >= 0; i--) {
+            returnedPointer.next = new ListNode(trackedNodes[i].val);
+            returnedPointer = returnedPointer.next;
+        }
+
+        return returnedPointerHead.next;
+    }
+}
+
 LINKED LIST CYCLE
     -Finding a linked list cycle was straight forward for me to figure out
     for the most part. The main idea here is to use two pointers, slowPointer
@@ -1187,5 +1227,61 @@ public class Solution {
         }
 
         return runningSum;
+    }
+}
+
+MERGE TWO SORTED SINGLY-LINKED LISTS INTO 1 SORTED SINGLY-LINKED LIST
+	-This problem is fairly easy. We can solve this problem by using two pointers
+	that will pass through each linked-list through a loop and a third singly-linked
+	list that we'll return. Within that loop, the program will compare and contrast 
+	between the two pointers, evaluating which one is smaller or higher. 
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     public int val;
+ *     public ListNode next;
+ *     public ListNode(int val=0, ListNode next=null) {
+ *         this.val = val;
+ *         this.next = next;
+ *     }
+ * }
+ */
+public class Solution {
+    public ListNode MergeTwoLists(ListNode list1, ListNode list2) {
+        if (list1 != null && list2 == null) return list1;
+        if (list1 == null && list2 != null) return list2;
+        if (list1 == null && list2 == null) return null;
+
+        ListNode pointer1 = list1;
+        ListNode pointer2 = list2;
+
+        ListNode pointer3 = new ListNode(0);
+        ListNode pointer3Head = new ListNode(0, pointer3);
+
+        while (pointer1 != null && pointer2 != null)
+        {
+            if (pointer1.val < pointer2.val) {
+                pointer3.val = pointer1.val;
+                pointer1 = pointer1.next == null ? null : pointer1.next;
+            } else {
+                pointer3.val = pointer2.val;
+                pointer2 = pointer2.next == null ? null : pointer2.next;
+            }
+
+            if (pointer1 != null && pointer2 != null) {
+                pointer3.next = new ListNode();
+                pointer3 = pointer3.next;
+            }
+        }
+
+        if (pointer1 == null && pointer2 != null) {
+            pointer3.next = pointer2;
+        }
+
+        if (pointer1 != null && pointer2 == null) {
+            pointer3.next = pointer1;
+        }
+
+        return pointer3Head.next;
     }
 }
